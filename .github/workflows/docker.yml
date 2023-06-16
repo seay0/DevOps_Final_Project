@@ -1,10 +1,10 @@
-name: Docker Image CI
+name: Docker Build CI/CD
 
 on:
   push:
-    branches: [ "example" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "example" ]
+    branches: [ "main" ]
 
 jobs:
 
@@ -13,6 +13,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${DOCKER_USERNAME}
+        password: ${DOCKER_PASSWORD}
+
+    - name: Build and push Docker image
+      uses: actions/checkout@v2
+      with:
+        context: .
+        push: true
+        tags: $/task-management-system:1.0
