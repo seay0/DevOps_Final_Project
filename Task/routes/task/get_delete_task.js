@@ -30,7 +30,7 @@ fastify.get('/task', (request, reply) => {
 fastify.delete('/:taskId', (request, reply) => {
   const task_id = request.params.task_id;
 
-  pool.getConnection((error, connection) => {
+  task.getConnection((error, connection) => {
     if (error) {
       reply.code(500).send({ error: 'Database connection error' });
     } else {
