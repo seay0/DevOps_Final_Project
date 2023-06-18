@@ -11,7 +11,7 @@ const task = mysql.createTask({
 fastify.post('/task', (request, reply) => {
   const { task_name, task_content, task_status, deadline, PIC, supervisor } = request.body;
   
-  pool.getConnection((error, connection) => {
+  task.getConnection((error, connection) => {
     if (error) {
       reply.code(500).send({ error: 'Database connection error' });
     } else {
