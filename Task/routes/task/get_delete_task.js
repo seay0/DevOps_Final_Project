@@ -28,7 +28,7 @@ fastify.get('/task', (request, reply) => {
 });
 
 fastify.delete('/:taskId', (request, reply) => {
-  const taskId = request.params.taskId;
+  const task_id = request.params.task_id;
 
   pool.getConnection((error, connection) => {
     if (error) {
