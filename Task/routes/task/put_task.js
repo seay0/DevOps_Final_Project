@@ -8,7 +8,7 @@ const task = mysql.createTask({
   database: ''
 });
 
-fastify.put('/:taskId', (request, reply) => {
+fastify.put('/:task_id', (request, reply) => {
   const task_id = request.params.taskId;
   const { task_name, task_content, task_status, deadline, PIC, supervisor } = request.body;
 
