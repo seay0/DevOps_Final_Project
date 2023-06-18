@@ -22,6 +22,6 @@ jobs:
     - name: Build and push Docker image
       uses: actions/checkout@v2
       with:
-        context: .
+        context: ../Task
         push: true
         tags: ${{ secrets.DOCKER_USERNAME }}/task-management-system:1.0
