@@ -55,22 +55,29 @@ module.exports = async function (fastify, opts) {
     });
   });
   
-  fastify.put('/:task_id', (request, reply) => {
-    const Task_id = request.params.taskId;
+  fastify.put('/task/:Task_id', (request, reply) => {
+    const Task_id = request.params.Task_id;
     const { Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email } = request.body;
   
     task.getConnection((error, connection) => {
       if (error) {
         reply.code(500).send({ error: 'Database connection error' });
       } else {
-        const query = `UPDATE Task SET task_name = '${Task_name}','${Task_contents}','${Task_status}', '${Deadline}', '${PIC_email}', '${Supervisor_email}'`;
+        const query = `UPDATE Task 
+                       SET Task_name = '${Task_name}',
+                       Task_contents = '${Task_contents}',
+                       Task_status = '${Task_status}',
+                       Deadline = '${Deadline}',
+                       PIC_email = '${PIC_email}',
+                       Supervisor_email = '${Supervisor_email}'
+                       WHERE Task_id = '${Task_id}'`;
         const values = [Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email, Task_id];
   
         connection.query(query, values, (error, results) => {
           connection.release();
   
           if (error) {
-            reply.code(500).send({ error: 'Failed to update task' });
+            reply.code(500).send(error);
           } else if (results.affectedRows === 0) {
             reply.code(404).send({ error: 'Task not found' });
           } else {
@@ -81,14 +88,14 @@ module.exports = async function (fastify, opts) {
     });
   });
   
-  fastify.delete('/:Task_id', (request, reply) => {
-    const Task_id = request.params.task_id;
+  fastify.delete('/task/:Task_id', (request, reply) => {
+    const Task_id = request.params.Task_id;
   
     task.getConnection((error, connection) => {
       if (error) {
         reply.code(500).send({ error: 'Database connection error' });
       } else {
-        const query = 'DELETE FROM Task WHERE Task_id = ?';
+        const query = `DELETE FROM Task WHERE Task_id = '${Task_id}'`;
         const values = [Task_id];
   
         connection.query(query, values, (error, results) => {
