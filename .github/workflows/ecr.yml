@@ -20,7 +20,7 @@ jobs:
           echo "region = ap-northeast-2" >> ~/.aws/config
 
       - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
         with:
           registry-type: private
           skip-logout: false
