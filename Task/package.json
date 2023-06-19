@@ -15,12 +15,23 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+<<<<<<< HEAD
     "@fastify/autoload": "^5.0.0",
     "@fastify/sensible": "^5.0.0",
     "fastify": "^4.0.0",
     "fastify-cli": "^5.7.1",
     "fastify-plugin": "^4.0.0",
     "mysql": "^2.18.1"
+=======
+    "@fastify/autoload": "^4.0.0",
+    "@fastify/sensible": "^5.0.0",
+    "fastify": "^4.0.0",
+    "fastify-autoload": "^3.13.0",
+    "fastify-cli": "^5.7.1",
+    "fastify-plugin": "^4.0.0",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.3.5"
+>>>>>>> 4b5f1b2 (fix package.json)
   },
   "devDependencies": {
     "tap": "^16.1.0"
