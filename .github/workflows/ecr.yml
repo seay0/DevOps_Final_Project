@@ -13,6 +13,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Configure AWS credentials
+        run: |
+          echo "[default]" >> ~/.aws/config
+          echo "region = ap-northeast-2" >> ~/.aws/config
+
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
         with:
@@ -21,13 +26,8 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t ${{ secrets.ECR_REPOSITORY_URL }}:latest .
-          docker push ${{ secrets.ECR_REPOSITORY_URL }}:latest
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-region: ${{ secrets.AWS_REGION }}
+          docker build -t ${{ secrets.ECR_REPOSITORY_URL }}:<IMAGE_TAG> .
+          docker push ${{ secrets.ECR_REPOSITORY_URL }}:<IMAGE_TAG>
 
       - name: Create or update ECS service
         run: |
