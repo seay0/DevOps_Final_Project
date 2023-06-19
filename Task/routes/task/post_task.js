@@ -1,11 +1,11 @@
 const fastify = require('fastify')();
 const mysql = require('mysql');
 
-const task = mysql.createTask({
-  host: '',
-  user: '',
-  password: '',
-  database: ''
+const task = mysql.createPool({
+  host: 'task-db.cnbepfnuujfk.ap-northeast-2.rds.amazonaws.com',
+  user: 'team5',
+  password: '12345678',
+  database: 'task-db'
 });
 
 fastify.post('/task', (request, reply) => {

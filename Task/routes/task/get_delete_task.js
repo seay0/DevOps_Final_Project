@@ -1,11 +1,11 @@
 const fastify = require('fastify')();
 const mysql = require('mysql');
 
-const task = mysql.createTask({
-  host: '',
-  user: '',
-  password: '',
-  database: ''
+const task = mysql.createPool({
+  host: 'task-db.cnbepfnuujfk.ap-northeast-2.rds.amazonaws.com',
+  user: 'team5',
+  password: '12345678',
+  database: 'task-db'
 });
 
 fastify.get('/task', (request, reply) => {
@@ -50,4 +50,12 @@ fastify.delete('/:taskId', (request, reply) => {
       });
     }
   });
+});
+
+fastify.listen(3000, (err) => {
+  if (err) {
+    console.error(err);
+    process.exit(1);
+  }
+  console.log('Server is running on port 3000');
 });
