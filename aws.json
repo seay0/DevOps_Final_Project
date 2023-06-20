@@ -1,5 +1,5 @@
 {
-  "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:227637924508:task-definition/taskmanagement_task:2",
+  "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:227637924508:task-definition/taskmanagement_task:7",
   "containerDefinitions": [
       {
           "name": "taskmanagement_con",
