@@ -14,8 +14,8 @@ const task = mysql.createPool({
 
 AWS.config.update({
   region: 'ap-northeast-2', 
-  accessKeyId: 'accessKeyId',
-  secretAccessKey: 'secretAccessKey'
+  accessKeyId: 'process.env.AccessKeyID',
+  secretAccessKey: 'process.env.secretAccessKey'
 });
 
 AWS.config.update({region: 'ap-northeast-2'});
@@ -96,8 +96,8 @@ module.exports = async function (fastify, opts) {
       }
     });
     //log
-    const LogType = 'create';
-    const Logcontent = `Supervisor ${Supervisor_email} create Task ${Task_name} at ${new Date().toISOString()}`;
+    let LogType = 'create';
+    let Logcontent = `Supervisor ${Supervisor_email} create Task ${Task_name} at ${new Date().toISOString()}`;
 
     try{
       await recordLog(LogType, Logcontent);
@@ -112,7 +112,7 @@ module.exports = async function (fastify, opts) {
   });
   
   fastify.put('/task/:Task_id', async (request, reply) => {
-    const Task_id = request.params.Task_id;
+    let Task_id = request.params.Task_id;
     const { Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email } = request.body;
   
     task.getConnection((error, connection) => {
@@ -142,9 +142,10 @@ module.exports = async function (fastify, opts) {
         });
       }
     });
+    
     //log
-    const LogType = 'Update';
-    const Logcontent = `Supervisor ${Supervisor_email} update Task ${Task_name} at ${new Date().toISOString()}`;
+    let LogType = 'Update';
+    let Logcontent = `Supervisor ${Supervisor_email} update Task ${Task_name} at ${new Date().toISOString()}`;
     
     //Done status
     if(Task_status == 'Done')
@@ -164,7 +165,7 @@ module.exports = async function (fastify, opts) {
   });
   
   fastify.delete('/task/:Task_id', async (request, reply) => {
-    const Task_id = request.params.Task_id;
+    let Task_id = request.params.Task_id;
   
     task.getConnection((error, connection) => {
       if (error) {
@@ -188,8 +189,8 @@ module.exports = async function (fastify, opts) {
     });
 
     //log
-    const LogType = 'Delete';
-    const Logcontent = `Supervisor ${Supervisor_email} Delete Task ${Task_name} at ${new Date().toISOString()}`;
+    let LogType = 'Delete';
+    let Logcontent = `Supervisor ${Supervisor_email} Delete Task ${Task_name} at ${new Date().toISOString()}`;
 
     try{
       await recordLog(LogType, Logcontent);
