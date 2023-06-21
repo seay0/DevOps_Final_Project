@@ -6,14 +6,14 @@ const AWS = require('aws-sdk');
 
 //RDS 접속
 const task = mysql.createPool({
-  host: 'task-database-mk1.cnbepfnuujfk.ap-northeast-2.rds.amazonaws.com',
-  user: 'team5',
-  password: '12345678',
-  database: 'task_db'
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
 });
 
 AWS.config.update({
-  region: 'ap-northeast-2', 
+  region: ap-northeast-2, 
   accessKeyId: process.env.AccessKeyID,
   secretAccessKey: process.env.secretAccessKey
 });
