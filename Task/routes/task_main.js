@@ -14,11 +14,9 @@ const task = mysql.createPool({
 
 AWS.config.update({
   region: 'ap-northeast-2', 
-  accessKeyId: process.env.AccessKeyID,
-  secretAccessKey: process.env.secretAccessKey
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 });
-
-AWS.config.update({region: 'ap-northeast-2'});
 
 //process.env.accessKeyId
 const DynamoClient = new AWS.DynamoDB.DocumentClient();
