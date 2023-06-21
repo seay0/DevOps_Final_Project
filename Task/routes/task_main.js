@@ -13,7 +13,7 @@ const task = mysql.createPool({
 });
 
 AWS.config.update({
-  region: ap-northeast-2, 
+  region: 'ap-northeast-2', 
   accessKeyId: process.env.AccessKeyID,
   secretAccessKey: process.env.secretAccessKey
 });
