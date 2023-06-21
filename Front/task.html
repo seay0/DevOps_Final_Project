@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+    padding: 20px;
+  }
+
+  table {
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    width: 70%;
+  }
+
+  th, td {
+    border: 1px solid black;
+    padding: 5px;
+    word-wrap: break-word;
+  }
+
+  /* The Modal (background) */
+  .modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+
+  /* Modal Content */
+  .modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+  }
+
+  /* The Close Button */
+  .close {
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  .close:hover,
+  .close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+
+  </style>
+</head>
+<body>
+  <table id="task-table">
+    <tr>
+      <th>Supervisor_email</th>
+      <th>PIC_email</th>
+      <th>Task_name</th>
+      <th>Task_contents</th>
+      <th>Status</th>
+      <th>Deadline</th>
+      <th>Actions</th>
+    </tr>
+  </table>
+
+  
+  <form id="new-task-form">
+    <input id="new-task-pic" type="text" placeholder="PIC_email">
+    <input id="new-task-name" type="text" placeholder="New task name">
+    <input id="new-task-content" type="text" placeholder="New task content">
+    <select id="new-task-status">
+      <option value="To do">To do</option>
+      <option value="In progress">In progress</option>
+      <option value="In test">In test</option>
+      <option value="Going over">Going over</option>
+      <option value="Done">Done</option>
+    </select>
+    
+    <input id="new-task-deadline" type="date" min="${getCurrentDate()}">
+    <button type="submit">Create Task</button>
+    
+  </form>
+
+  <!-- The Modal -->
+  <div id="myModal" class="modal">
+
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close">×</span>
+      <form id="edit-task-form">
+        <input id="edit-task-pic" type="text" placeholder="PIC_email">
+        <input id="edit-task-name" type="text" placeholder="Task name">
+        <input id="edit-task-content" type="text" placeholder="Task content">
+        <select id="edit-task-status">
+          <option value="To do">To do</option>
+          <option value="In progress">In progress</option>
+          <option value="In test">In test</option>
+          <option value="Going over">Going over</option>
+          <option value="Done">Done</option>
+        </select>
+        <input id="edit-task-deadline" type="date" min="2023-06-19">
+        <button type="submit">Update Task</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+      function stopEdit() {
+    isEditing = false;
+    currentTaskId = null;
+  }
+
+    const editTaskForm = document.getElementById('edit-task-form');
+    const editTaskContent = document.getElementById('edit-task-content');
+    const editTaskStatus = document.getElementById('edit-task-status');
+    const editTaskDeadline = document.getElementById('edit-task-deadline');
+    const editTaskName = document.getElementById('edit-task-name');
+    const editTaskPic = document.getElementById('edit-task-pic');
+    const modal = document.getElementById('myModal');
+    const closeModal = document.getElementsByClassName('close')[0];
+
+    const taskTable = document.getElementById('task-table');
+    const newTaskForm = document.getElementById('new-task-form');
+    const newTaskContent = document.getElementById('new-task-content');
+    const newTaskStatus = document.getElementById('new-task-status');
+    const newTaskDeadline = document.getElementById('new-task-deadline');
+    const newTaskName = document.getElementById('new-task-name');
+    const newTaskPic = document.getElementById('new-task-pic');
+    const taskStates = ['To do', 'In progress', 'In test', 'Going over', 'Done'];
+
+    let tasks = [];
+    let isEditing = false;
+    let currentTaskId = null;
+
+    function startEdit(id) {
+      const task = tasks.find(task => task.id === id);
+      if (task) {
+        editTaskPic.value = task.pic;
+        editTaskName.value = task.task_name;
+        editTaskContent.value = task.task_contents;
+        editTaskStatus.value = task.state;
+        editTaskDeadline.value = task.deadline;
+
+        modal.style.display = "block"; // Open the modal
+
+        isEditing = true;
+        currentTaskId = id;
+      }
+    }
+
+    function updateTask() {
+  const task = tasks.find(task => task.id === currentTaskId);
+  if (task) {
+    task.pic = editTaskPic.value;
+    task.task_name = editTaskName.value;
+    task.task_contents = editTaskContent.value;
+    task.state = editTaskStatus.value;
+    task.deadline = editTaskDeadline.value;
+
+    stopEdit();
+    modal.style.display = "none"; // 모달 닫기
+  }
+}
+
+
+    // x 버튼을 눌렀을 때 모달 화면이 꺼지도록 하는 기능 
+      closeModal.onclick = function() {
+      modal.style.display = "none";
+      stopEdit();
+    }
+
+    // 모달 밖 화면을 눌렀을 때 사라지도록 하는 기능
+    window.onclick = function(event) {
+      if (event.target === modal) {
+        modal.style.display = "none";
+        stopEdit();
+      }
+    }
+
+    editTaskForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+      updateTask();
+      renderTasks();
+    });
+
+    function deleteTask(id) {
+      tasks = tasks.filter(task => task.id !== id);
+      renderTasks();
+    }
+
+    function renderTasks() {
+      while (taskTable.rows.length > 1) {
+        taskTable.deleteRow(1);
+      }
+
+      tasks.forEach((task, index) => {
+        const row = taskTable.insertRow(-1);
+
+        for(let key in task) {
+          if(key !== 'state' && key !== 'deadline' && key !== 'id') {
+            const cell = row.insertCell(-1);
+            cell.textContent = task[key];
+          }
+        }
+
+        const stateCell = row.insertCell(-1);
+        const deadlineCell = row.insertCell(-1);
+        deadlineCell.textContent = task.deadline;
+
+        const stateSelect = document.createElement('select');
+        taskStates.forEach(state => {
+          const option = document.createElement('option');
+          option.value = state;
+          option.text = state;
+          if (state === task.state) {
+            option.selected = true;
+          }
+          stateSelect.add(option);
+        });
+        stateSelect.addEventListener('change', (e) => {
+          task.state = e.target.value;
+        });
+        stateCell.appendChild(stateSelect);
+
+        const actionsCell = row.insertCell(-1);
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.addEventListener('click', () => {
+          deleteTask(task.id);
+        });
+        actionsCell.appendChild(deleteButton);
+
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.addEventListener('click', () => {
+          startEdit(task.id);
+        });
+        actionsCell.appendChild(editButton);
+      });
+    }
+
+    newTaskForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      // function to validate email
+      function isValidEmail(email) {
+        const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+        return re.test(email);
+      }
+
+      // input validation
+      if (
+        !isValidEmail(newTaskPic.value) || newTaskPic.value.length > 50 || 
+        newTaskName.value.length > 50 || newTaskContent.value.length > 2000 || 
+        newTaskContent.value.length === 0 || newTaskStatus.value.length > 20 ||
+        newTaskStatus.value.length === 0 || newTaskDeadline.value.length > 50 || 
+        newTaskDeadline.value.length === 0 ) {
+        alert("값 입력에 문제가 있는 것 같습니다. 아래 항목들을 기입해주세요"+"\n"+"- PIC_email : 이메일 형식 (example@example.com )"+"\n"+"- New task name, New task content : 문자열 혹은 숫자"+"\n"+ "- 마감기한");
+        return;
+      }
+
+      const supervisorEmail = localStorage.getItem('email') || 'default@email.com';
+
+      if (isEditing) {
+        updateTask();
+      } else {
+        const newTask = {
+          id: tasks.length + 1,
+          supervisor_email: supervisorEmail,
+          pic: newTaskPic.value,
+          task_name: newTaskName.value,
+          task_contents: newTaskContent.value,
+          state: newTaskStatus.value,
+          deadline: newTaskDeadline.value,
+        };
+        tasks.push(newTask);
+      }
+
+      // 초기화 코드 추가
+      newTaskPic.value = '';
+      newTaskName.value = '';
+      newTaskContent.value = '';
+      newTaskStatus.value = 'To do';
+      newTaskDeadline.value = '';
+
+      renderTasks();
+    });
+
+    // 데드라인에서 오늘 이후의 날짜만 선택할 수 있는 코드 생성
+    function getCurrentDate() {
+      const now = new Date();
+      const year = now.getFullYear();
+      let month = now.getMonth() + 1;
+      if (month < 10) {
+        month = `0${month}`;
+      }
+      let day = now.getDate();
+      if (day < 10) {
+        day = `0${day}`;
+      }
+      return `${year}-${month}-${day}`;
+    }
+
+    // Rest of the JavaScript code here
+
+    const newTaskDeadlineInput = document.getElementById('new-task-deadline');
+    newTaskDeadlineInput.min = getCurrentDate();
+  </script>
+</body>
+</html>
