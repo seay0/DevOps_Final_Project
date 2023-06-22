@@ -14,11 +14,9 @@ const task = mysql.createPool({
 
 AWS.config.update({
   region: 'ap-northeast-2', 
-  accessKeyId: process.env.AccessKeyID,
-  secretAccessKey: process.env.secretAccessKey
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 });
-
-AWS.config.update({region: 'ap-northeast-2'});
 
 //process.env.accessKeyId
 const DynamoClient = new AWS.DynamoDB.DocumentClient();
@@ -51,7 +49,7 @@ function errorResponse(errorMessage, awsRequestId, callback) {
 
 
 module.exports = async function (fastify, opts) {
-  fastify.get('/task', (request, reply) => {
+  fastify.get('/', (request, reply) => {
     task.getConnection((error, connection) => {
       if (error) {
         reply.code(500).send({ error: 'Database connection error' });
@@ -71,7 +69,7 @@ module.exports = async function (fastify, opts) {
   });
   
   //create task
-  fastify.post('/task', async (request, reply) => {
+  fastify.post('/', async (request, reply) => {
     const Task_id = request.params.taskId;
     const { Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email } = request.body;
     
@@ -111,7 +109,7 @@ module.exports = async function (fastify, opts) {
     }
   });
   
-  fastify.put('/task/:Task_id', async (request, reply) => {
+  fastify.put('/:Task_id', async (request, reply) => {
     let Task_id = request.params.Task_id;
     const { Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email } = request.body;
   
@@ -164,7 +162,7 @@ module.exports = async function (fastify, opts) {
     
   });
   
-  fastify.delete('/task/:Task_id', async (request, reply) => {
+  fastify.delete('/:Task_id', async (request, reply) => {
     let Task_id = request.params.Task_id;
   
     task.getConnection((error, connection) => {
