@@ -72,9 +72,14 @@ module.exports = async function (fastify, opts) {
   fastify.post('/', async (request, reply) => {
     const Task_id = request.params.taskId;
     const { Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email } = request.body;
+    //log
+    let LogType = 'create';
+    let Logcontent = `Supervisor ${Supervisor_email} create Task ${Task_name} at ${new Date().toISOString()}`;
+
+
+    await recordLog(LogType, Logcontent);
     
-    
-    task.getConnection(async (error, connection) => {
+    task.getConnection((error, connection) => {
       if (error) {
         reply.code(500).send({ error: 'Database connection error' });
       } else {
@@ -82,12 +87,7 @@ module.exports = async function (fastify, opts) {
                        VALUES ('${Task_name}','${Task_contents}','${Task_status}', '${Deadline}', '${PIC_email}', '${Supervisor_email}')`;
         
         const values = [Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email, Task_id];
-        //log
-        let LogType = 'create';
-        let Logcontent = `Supervisor ${Supervisor_email} create Task ${Task_name} at ${new Date().toISOString()}`;
 
-
-        await recordLog(LogType, Logcontent);
 
         connection.query(query, values, (error, results) => {
           connection.release();
@@ -106,7 +106,19 @@ module.exports = async function (fastify, opts) {
     let Task_id = request.params.Task_id;
     const { Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email } = request.body;
   
-    task.getConnection(async (error, connection) => {
+    //log
+    let LogType = 'Update';
+    let Logcontent = `Supervisor ${Supervisor_email} update Task ${Task_name} at ${new Date().toISOString()}`;
+    
+    //Done status
+    if(Task_status == 'Done'){
+      LogType = 'Done';
+      Logcontent = `Supervisor ${Supervisor_email} Done Task ${Task_name} at ${new Date().toISOString()}`;
+    }
+
+    await recordLog(LogType, Logcontent);
+
+    task.getConnection((error, connection) => {
       if (error) {
         reply.code(500).send({ error: 'Database connection error' });
       } else {
@@ -119,20 +131,7 @@ module.exports = async function (fastify, opts) {
                        Supervisor_email = '${Supervisor_email}'
                        WHERE Task_id = '${Task_id}'`;
         const values = [Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email, Task_id];
-            //log
-        let LogType = 'Update';
-        let Logcontent = `Supervisor ${Supervisor_email} update Task ${Task_name} at ${new Date().toISOString()}`;
-        
-        //Done status
-        if(Task_status == 'Done'){
-          LogType = 'Done';
-          Logcontent = `Supervisor ${Supervisor_email} Done Task ${Task_name} at ${new Date().toISOString()}`;
-        }
 
-        await recordLog(LogType, Logcontent);
-
-
-        
         connection.query(query, values, (error, results) => {
           connection.release();
   
@@ -146,26 +145,24 @@ module.exports = async function (fastify, opts) {
         });
       }
     });
-    
-
-    
+ 
   });
   
   fastify.delete('/:Task_id', async (request, reply) => {
     let Task_id = request.params.Task_id;
-  
-    task.getConnection(async (error, connection) => {
+
+    //log
+    let LogType = 'Delete';
+    let Logcontent = `Supervisor ${Supervisor_email} Delete Task ${Task_name} at ${new Date().toISOString()}`;
+
+    await recordLog(LogType, Logcontent);
+
+    task.getConnection((error, connection) => {
       if (error) {
         reply.code(500).send({ error: 'Database connection error' });
       } else {
         const query = `DELETE FROM Task WHERE Task_id = '${Task_id}'`;
         const values = [Task_id];
-  
-        //log
-        let LogType = 'Delete';
-        let Logcontent = `Supervisor ${Supervisor_email} Delete Task ${Task_name} at ${new Date().toISOString()}`;
-
-        await recordLog(LogType, Logcontent);
 
         connection.query(query, values, (error, results) => {
           connection.release();
