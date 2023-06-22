@@ -121,6 +121,42 @@
   </div>
 
   <script>
+
+
+  const response = await fetch('https://jeu65tbcz6.execute-api.ap-northeast-2.amazonaws.com/stage6-22/task_management');
+  const data = await response.json();
+  tasks = data; // Assuming the API returns an array of tasks
+  renderTasks();
+
+function renderTasks() {
+  // Clear the table
+  while (taskTable.rows.length > 1) {
+    taskTable.deleteRow(1);
+  }
+
+  // Add each task to the table
+  tasks.forEach(task => {
+    const row = taskTable.insertRow(-1);
+
+    const supervisorEmailCell = row.insertCell(-1);
+    supervisorEmailCell.textContent = task.supervisor_email;
+
+    const picEmailCell = row.insertCell(-1);
+    picEmailCell.textContent = task.pic_email;
+
+    const taskNameCell = row.insertCell(-1);
+    taskNameCell.textContent = task.task_name;
+
+    const taskContentsCell = row.insertCell(-1);
+    taskContentsCell.textContent = task.task_contents;
+
+    const statusCell = row.insertCell(-1);
+    statusCell.textContent = task.status;
+
+    const deadlineCell = row.insertCell(-1);
+    deadlineCell.textContent = task.deadline;
+  });
+}
       function stopEdit() {
     isEditing = false;
     currentTaskId = null;
