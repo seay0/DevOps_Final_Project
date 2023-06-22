@@ -1,51 +1,42 @@
-const AWS = require('aws-sdk');
-const ddb = new AWS.DynamoDB.DocumentClient();
+var aws = require("aws-sdk");
+var ses = new aws.SES({ region: "ap-northeast-2" });
+var dynamodb = new aws.DynamoDB({ region: "ap-northeast-2" });
 
-// DynamoDB에서 사용자 정보를 찾는 함수
-async function findUser(email, password) {
-  const params = {
-    TableName: 'Dynamo_user',
-    Key: {
-      email: email,
-      password: password,
-    },
+exports.handler = async function (event) {
+  var params = {
+    TableName: "Dynamo_Log", // 테이블 이름을 여기에 입력하세요
   };
 
-  return ddb.get(params).promise();
-}
+  var data = await dynamodb.scan(params).promise();
 
-exports.handler = async (event) => {
-  try {
-    const email = event.email;
-    const password = event.password;
+  // 모든 항목을 스캔한 후에 JavaScript 배열의 sort 함수를 사용하여 최신 항목을 찾습니다.
+  var sortedItems = data.Items.sort(function(a, b) {
+    return new Date(b.Timestamp.S) - new Date(a.Timestamp.S);
+  });
 
-    // Find the user with the given email and password in the DynamoDB table
-    const data = await findUser(email, password);
-
-    // Check if user data is returned
-    if (!data.Item) {
-      // User not found
-      return {
-        statusCode: 404,
-        body: JSON.stringify({ message: 'User not found' }),
-      };
-    } else {
-      // User found, login successful
-      return {
-        statusCode: 200,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Credentials': true,
-        },
-        body: JSON.stringify({ message: 'Login successful' }),
-      };
-    }
-  } catch (error) {
-    console.log(error);
-    return {
-      statusCode: 500,
-      body: 'Error occurred',
-    };
+  var textBody = "";
+  if (sortedItems.length > 0) {
+    var item = sortedItems[0];
+    textBody += `Timestamp: ${item.Timestamp.S}\nLogType: ${item.LogType.S}\nLogContent: ${item.Logcontent.S}\n\n`;
   }
-};
 
+  var subject = "DynamoDB Table Contents";
+
+  var emailParams = {
+    Destination: {
+      ToAddresses: [
+        "mase306.devops@gmail.com",
+        "wnalsrud113@gmail.com"
+      ],
+    },
+    Message: {
+      Body: {
+        Text: { Data: textBody },
+      },
+      Subject: { Data: subject },
+    },
+    Source: "mase306.devops@gmail.com",
+  };
+
+  return ses.sendEmail(emailParams).promise();
+};
