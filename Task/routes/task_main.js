@@ -67,14 +67,28 @@ module.exports = async function (fastify, opts) {
       }
     });
   });
-  
+   
   //create task
-  fastify.post('/', async (request, reply) => {
+  fastify.post('/', (request, reply) => {
     const Task_id = request.params.taskId;
     const { Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email } = request.body;
     
-    
-    task.getConnection(async (error, connection) => {
+    //log
+    let LogType = 'create';
+    let Logcontent = `Supervisor ${Supervisor_email} create Task ${Task_name} at ${new Date().toISOString()}`;
+
+    try{
+      recordLog(LogType, Logcontent);
+
+    }catch(e){
+      console.log(e);
+      return {
+        statusCode: 500,
+        body: 'Error occurred'
+      }
+    }
+
+    task.getConnection((error, connection) => {
       if (error) {
         reply.code(500).send({ error: 'Database connection error' });
       } else {
@@ -93,12 +107,23 @@ module.exports = async function (fastify, opts) {
         });
       }
     });
-    //log
-    let LogType = 'create';
-    let Logcontent = `Supervisor ${Supervisor_email} create Task ${Task_name} at ${new Date().toISOString()}`;
 
+  });
+  
+  fastify.put('/:Task_id', (request, reply) => {
+    let Task_id = request.params.Task_id;
+    const { Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email } = request.body;
+  
+    //log
+    let LogType = 'Update';
+    let Logcontent = `Supervisor ${Supervisor_email} update Task ${Task_name} at ${new Date().toISOString()}`;
+    
+    //Done status
+    if(Task_status == 'Done')
+      LogType = 'Done';
+      Logcontent = `Supervisor ${Supervisor_email} Done Task ${Task_name} at ${new Date().toISOString()}`;
     try{
-      await recordLog(LogType, Logcontent);
+      recordLog(LogType, Logcontent);
 
     }catch(e){
       console.log(e);
@@ -107,12 +132,9 @@ module.exports = async function (fastify, opts) {
         body: 'Error occurred'
       }
     }
-  });
-  
-  fastify.put('/:Task_id', async (request, reply) => {
-    let Task_id = request.params.Task_id;
-    const { Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email } = request.body;
-  
+    
+
+
     task.getConnection((error, connection) => {
       if (error) {
         reply.code(500).send({ error: 'Database connection error' });
@@ -142,16 +164,18 @@ module.exports = async function (fastify, opts) {
     });
     
     
+
+  });
+  
+  fastify.delete('/:Task_id', (request, reply) => {
+    let Task_id = request.params.Task_id;
+
     //log
-    let LogType = 'Update';
-    let Logcontent = `Supervisor ${Supervisor_email} update Task ${Task_name} at ${new Date().toISOString()}`;
-    
-    //Done status
-    if(Task_status == 'Done')
-      LogType = 'Done';
-      Logcontent = `Supervisor ${Supervisor_email} Done Task ${Task_name} at ${new Date().toISOString()}`;
+    let LogType = 'Delete';
+    let Logcontent = `Supervisor ${Supervisor_email} Delete Task ${Task_name} at ${new Date().toISOString()}`;
+
     try{
-      await recordLog(LogType, Logcontent);
+      recordLog(LogType, Logcontent);
 
     }catch(e){
       console.log(e);
@@ -160,11 +184,6 @@ module.exports = async function (fastify, opts) {
         body: 'Error occurred'
       }
     }
-    
-  });
-  
-  fastify.delete('/:Task_id', async (request, reply) => {
-    let Task_id = request.params.Task_id;
   
     task.getConnection((error, connection) => {
       if (error) {
@@ -187,19 +206,6 @@ module.exports = async function (fastify, opts) {
       }
     });
 
-    //log
-    let LogType = 'Delete';
-    let Logcontent = `Supervisor ${Supervisor_email} Delete Task ${Task_name} at ${new Date().toISOString()}`;
 
-    try{
-      await recordLog(LogType, Logcontent);
-
-    }catch(e){
-      console.log(e);
-      return {
-        statusCode: 500,
-        body: 'Error occurred'
-      }
-    }
   });
 }
