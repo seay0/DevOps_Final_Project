@@ -97,7 +97,7 @@ module.exports = async function (fastify, opts) {
 
     try{
       await recordLog(LogType, Logcontent);
-
+      reply.code(201).send(results);
     }catch(e){
       console.log(e);
       return {
@@ -106,7 +106,7 @@ module.exports = async function (fastify, opts) {
       }
     }
 
-    reply.code(201).send(results);
+
 
   });
   
@@ -150,7 +150,7 @@ module.exports = async function (fastify, opts) {
       Logcontent = `Supervisor ${Supervisor_email} Done Task ${Task_name} at ${new Date().toISOString()}`;
     try{
       await recordLog(LogType, Logcontent);
-
+      reply.code(200).send({ message: 'Task updated successfully' });
     }catch(e){
       console.log(e);
       return {
@@ -159,7 +159,7 @@ module.exports = async function (fastify, opts) {
       }
     }
 
-    reply.code(200).send({ message: 'Task updated successfully' });
+
 
   });
   
@@ -191,7 +191,7 @@ module.exports = async function (fastify, opts) {
 
     try{
       await recordLog(LogType, Logcontent);
-
+      reply.code(200).send({ message: 'Task deleted successfully' });
     }catch(e){
       console.log(e);
       return {
@@ -199,8 +199,6 @@ module.exports = async function (fastify, opts) {
         body: 'Error occurred'
       }
     }
-
-    reply.code(200).send({ message: 'Task deleted successfully' });
 
   });
 }
