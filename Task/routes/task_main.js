@@ -18,30 +18,41 @@ AWS.config.update({
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 });
 
+//process.env.accessKeyId
 const DynamoClient = new AWS.DynamoDB.DocumentClient();
 
 //다이나모DB값 넣기
-async function recordLog(LogType, Logcontent) {
-  try {
-    await DynamoClient.put({
-      TableName: 'Dynamo_Log',
-      Item: {
-        Timestamp: new Date().toISOString(),
-        LogType: LogType,
-        Logcontent: Logcontent,
-      },
-    }).promise();
-  } catch (error) {
-    console.error("Error while writing to DynamoDB:", error);
-  }
+function recordLog(LogType, Logcontent) {
+  return DynamoClient.put({
+    TableName: 'Dynamo_Log',
+    Item: {
+      Timestamp: new Date().toISOString(),
+      LogType: LogType,
+      Logcontent: Logcontent,
+    },
+  }).promise();
 }
+
+//에러컨트롤
+function errorResponse(errorMessage, awsRequestId, callback) {
+  callback(null, {
+    statusCode: 500,
+    body: JSON.stringify({
+      Error: errorMessage,
+      Reference: awsRequestId,
+    }),
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
+  });
+}
+
 
 module.exports = async function (fastify, opts) {
   fastify.get('/', (request, reply) => {
     task.getConnection((error, connection) => {
       if (error) {
         reply.code(500).send({ error: 'Database connection error' });
-        console.error('Database connection error:', error);
       } else {
         const query = 'SELECT * FROM Task';
   
@@ -49,7 +60,6 @@ module.exports = async function (fastify, opts) {
           connection.release();
             if (error) {
               reply.code(500).send({ error: 'Failed to get tasks' });
-              console.error('Failed to get tasks:', error);
             } else {
               reply.code(200).send(results);
             }
@@ -57,117 +67,139 @@ module.exports = async function (fastify, opts) {
       }
     });
   });
-
+  
+  //create task
   fastify.post('/', async (request, reply) => {
+    const Task_id = request.params.taskId;
     const { Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email } = request.body;
-  
-    try {
-      let LogType = 'create';
-      let Logcontent = `Supervisor ${Supervisor_email} create Task ${Task_name} at ${new Date().toISOString()}`;
-  
-      await recordLog(LogType, Logcontent);
-  
-      task.getConnection((error, connection) => {
-        if (error) {
-          reply.code(500).send({ error: 'Database connection error' });
-          console.error('Database connection error:', error);
-        } else {
-          const query = `INSERT INTO Task (Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email) 
-                         VALUES (?, ?, ?, ?, ?, ?)`;
-          const values = [Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email];
-  
-          connection.query(query, values, (error, results) => {
-            connection.release();
+    
+    
+    task.getConnection(async (error, connection) => {
+      if (error) {
+        reply.code(500).send({ error: 'Database connection error' });
+      } else {
+        const query = `INSERT INTO Task (Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email) 
+                       VALUES ('${Task_name}','${Task_contents}','${Task_status}', '${Deadline}', '${PIC_email}', '${Supervisor_email}')`;
+        
+        const values = [Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email, Task_id];
+    
+        connection.query(query, values, (error, results) => {
+          connection.release();
             if (error) {
               reply.code(500).send({ error: 'Failed to create task' });
-              console.error('Failed to create task:', error);
             } else {
               reply.code(201).send(results);
             }
-          });
-        }
-      });
-    } catch (error) {
-      console.error("Error in post request:", error);
+        });
+      }
+    });
+    //log
+    let LogType = 'create';
+    let Logcontent = `Supervisor ${Supervisor_email} create Task ${Task_name} at ${new Date().toISOString()}`;
+
+    try{
+      await recordLog(LogType, Logcontent);
+
+    }catch(e){
+      console.log(e);
+      return {
+        statusCode: 500,
+        body: 'Error occurred'
+      }
     }
   });
-
+  
   fastify.put('/:Task_id', async (request, reply) => {
     let Task_id = request.params.Task_id;
     const { Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email } = request.body;
   
-    try {
-      let LogType = 'Update';
-      let Logcontent = `Supervisor ${Supervisor_email} update Task ${Task_name} at ${new Date().toISOString()}`;
-      
-      if(Task_status == 'Done'){
-        LogType = 'Done';
-        Logcontent = `Supervisor ${Supervisor_email} Done Task ${Task_name} at ${new Date().toISOString()}`;
+    task.getConnection((error, connection) => {
+      if (error) {
+        reply.code(500).send({ error: 'Database connection error' });
+      } else {
+        const query = `UPDATE Task 
+                       SET Task_name = '${Task_name}',
+                       Task_contents = '${Task_contents}',
+                       Task_status = '${Task_status}',
+                       Deadline = '${Deadline}',
+                       PIC_email = '${PIC_email}',
+                       Supervisor_email = '${Supervisor_email}'
+                       WHERE Task_id = '${Task_id}'`;
+        const values = [Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email, Task_id];
+  
+        connection.query(query, values, (error, results) => {
+          connection.release();
+  
+          if (error) {
+            reply.code(500).send(error);
+          } else if (results.affectedRows === 0) {
+            reply.code(404).send({ error: 'Task not found' });
+          } else {
+            reply.code(200).send({ message: 'Task updated successfully' });
+          }
+        });
       }
-  
+    });
+    
+    
+    //log
+    let LogType = 'Update';
+    let Logcontent = `Supervisor ${Supervisor_email} update Task ${Task_name} at ${new Date().toISOString()}`;
+    
+    //Done status
+    if(Task_status == 'Done')
+      LogType = 'Done';
+      Logcontent = `Supervisor ${Supervisor_email} Done Task ${Task_name} at ${new Date().toISOString()}`;
+    try{
       await recordLog(LogType, Logcontent);
-  
-      task.getConnection((error, connection) => {
-        if (error) {
-          reply.code(500).send({ error: 'Database connection error' });
-          console.error('Database connection error:', error);
-        } else {
-          const query = `UPDATE Task 
-                         SET Task_name = ?, Task_contents = ?, Task_status = ?, Deadline = ?, PIC_email = ?, Supervisor_email = ?
-                         WHERE Task_id = ?`;
-          const values = [Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email, Task_id];
-  
-          connection.query(query, values, (error, results) => {
-            connection.release();
-            if (error) {
-              reply.code(500).send({ error: 'Failed to update task' });
-              console.error('Failed to update task:', error);
-            } else if (results.affectedRows === 0) {
-              reply.code(404).send({ error: 'Task not found' });
-            } else {
-              reply.code(200).send({ message: 'Task updated successfully' });
-            }
-          });
-        }
-      });
-    } catch (error) {
-      console.error("Error in put request:", error);
-    }
-  });
 
+    }catch(e){
+      console.log(e);
+      return {
+        statusCode: 500,
+        body: 'Error occurred'
+      }
+    }
+    
+  });
+  
   fastify.delete('/:Task_id', async (request, reply) => {
     let Task_id = request.params.Task_id;
+  
+    task.getConnection((error, connection) => {
+      if (error) {
+        reply.code(500).send({ error: 'Database connection error' });
+      } else {
+        const query = `DELETE FROM Task WHERE Task_id = '${Task_id}'`;
+        const values = [Task_id];
+  
+        connection.query(query, values, (error, results) => {
+          connection.release();
+  
+          if (error) {
+            reply.code(500).send({ error: 'Failed to delete task' });
+          } else if (results.affectedRows === 0) {
+            reply.code(404).send({ error: 'Task not found' });
+          } else {
+            reply.code(200).send({ message: 'Task deleted successfully' });
+          }
+        });
+      }
+    });
 
-    try {
-      let LogType = 'Delete';
-      let Logcontent = `Task with id ${Task_id} deleted at ${new Date().toISOString()}`;
+    //log
+    let LogType = 'Delete';
+    let Logcontent = `Supervisor ${Supervisor_email} Delete Task ${Task_name} at ${new Date().toISOString()}`;
 
+    try{
       await recordLog(LogType, Logcontent);
 
-      task.getConnection((error, connection) => {
-        if (error) {
-          reply.code(500).send({ error: 'Database connection error' });
-          console.error('Database connection error:', error);
-        } else {
-          const query = `DELETE FROM Task WHERE Task_id = ?`;
-          const values = [Task_id];
-
-          connection.query(query, values, (error, results) => {
-            connection.release();
-  
-            if (error) {
-              reply.code(500).send({ error: 'Failed to delete task' });
-              console.error('Failed to delete task:', error);
-            } else if (results.affectedRows === 0) {
-              reply.code(404).send({ error: 'Task not found' });
-            } else {
-              reply.code(200).send({ message: 'Task deleted successfully' });
-            }
-          });
-        }
-      });
-    } catch (error) {
-      console.error("Error in delete request:", error);
+    }catch(e){
+      console.log(e);
+      return {
+        statusCode: 500,
+        body: 'Error occurred'
+      }
     }
   });
 }
