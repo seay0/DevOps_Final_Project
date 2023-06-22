@@ -87,8 +87,6 @@ module.exports = async function (fastify, opts) {
           connection.release();
             if (error) {
               reply.code(500).send({ error: 'Failed to create task' });
-            } else {
-              reply.code(201).send(results);
             }
         });
       }
@@ -107,6 +105,9 @@ module.exports = async function (fastify, opts) {
         body: 'Error occurred'
       }
     }
+
+    reply.code(201).send(results);
+
   });
   
   fastify.put('/:Task_id', async (request, reply) => {
@@ -134,8 +135,6 @@ module.exports = async function (fastify, opts) {
             reply.code(500).send(error);
           } else if (results.affectedRows === 0) {
             reply.code(404).send({ error: 'Task not found' });
-          } else {
-            reply.code(200).send({ message: 'Task updated successfully' });
           }
         });
       }
@@ -159,7 +158,9 @@ module.exports = async function (fastify, opts) {
         body: 'Error occurred'
       }
     }
-    
+
+    reply.code(200).send({ message: 'Task updated successfully' });
+
   });
   
   fastify.delete('/:Task_id', async (request, reply) => {
@@ -179,9 +180,7 @@ module.exports = async function (fastify, opts) {
             reply.code(500).send({ error: 'Failed to delete task' });
           } else if (results.affectedRows === 0) {
             reply.code(404).send({ error: 'Task not found' });
-          } else {
-            reply.code(200).send({ message: 'Task deleted successfully' });
-          }
+          } 
         });
       }
     });
@@ -200,5 +199,8 @@ module.exports = async function (fastify, opts) {
         body: 'Error occurred'
       }
     }
+
+    reply.code(200).send({ message: 'Task deleted successfully' });
+
   });
 }
