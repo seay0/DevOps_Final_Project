@@ -21,8 +21,10 @@ AWS.config.update({
 //process.env.accessKeyId
 const DynamoClient = new AWS.DynamoDB.DocumentClient();
 
+
 //다이나모DB값 넣기
 function recordLog(LogType, Logcontent) {
+  console.log("Trying Dynamo")
   return DynamoClient.put({
     TableName: 'Dynamo_Log',
     Item: {
@@ -31,20 +33,6 @@ function recordLog(LogType, Logcontent) {
       Logcontent: Logcontent,
     },
   }).promise();
-}
-
-//에러컨트롤
-function errorResponse(errorMessage, awsRequestId, callback) {
-  callback(null, {
-    statusCode: 500,
-    body: JSON.stringify({
-      Error: errorMessage,
-      Reference: awsRequestId,
-    }),
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-    },
-  });
 }
 
 
@@ -76,10 +64,10 @@ module.exports = async function (fastify, opts) {
     //log
     let LogType = 'create';
     let Logcontent = `Supervisor ${Supervisor_email} create Task ${Task_name} at ${new Date().toISOString()}`;
-
+    console.log("Before Try Dynamo")
     try{
       recordLog(LogType, Logcontent);
-
+      console.log("After Try Dynamo")
     }catch(e){
       console.log(e);
       return {
@@ -96,6 +84,7 @@ module.exports = async function (fastify, opts) {
                        VALUES ('${Task_name}','${Task_contents}','${Task_status}', '${Deadline}', '${PIC_email}', '${Supervisor_email}')`;
         
         const values = [Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email, Task_id];
+        console.log("Before Try MysqlQuery")
     
         connection.query(query, values, (error, results) => {
           connection.release();
