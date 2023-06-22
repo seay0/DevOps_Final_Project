@@ -13,14 +13,23 @@ const DynamoClient = new AWS.DynamoDB.DocumentClient();
 //다이나모DB값 넣기
 function recordLog(LogType, Logcontent) {
     console.log("Trying Dynamo")
-    return DynamoClient.put({
+    
+    const item = {
       TableName: 'Dynamo_Log',
       Item: {
         Timestamp: new Date().toISOString(),
         LogType: LogType,
         Logcontent: Logcontent,
       },
-    }).promise();
+    }
+
+    return DynamoClient.put(item, (error, data) => {  
+      if (error) {
+        console.log("Error", error);
+      } else {
+        console.log("Success", data);
+      }
+    });
   }
 
 module.exports = async function (fastify, opts) {
