@@ -39,8 +39,7 @@ module.exports = async function (fastify, opts) {
     const mysql = fastify.mysql;
       const query = `SELECT * FROM Task`;
       const result = await mysql.query(query);
-      console.log(result);
-      reply.code(200).header('Content-type','application/json').send(result[0])
+      reply.code(200).header(result)
 
   })
 
@@ -70,8 +69,9 @@ module.exports = async function (fastify, opts) {
     VALUES ('${Task_name}','${Task_contents}','${Task_status}', '${Deadline}', '${PIC_email}', '${Supervisor_email}')`;
     
     const result = await mysql.query(query);
-    console.log(result);
-    reply.code(200).header('Content-type','application/json').send(result[0])
+    //console.log(result);
+    console.log("mysql completed");
+    reply.code(200).header(result)
 
   });
 
@@ -109,8 +109,9 @@ module.exports = async function (fastify, opts) {
     WHERE Task_id = '${Task_id}'`;
     
     const result = await mysql.query(query);
-    console.log(result);
-    reply.code(200).header('Content-type','application/json').send(result[0])
+    //console.log(result);
+    console.log("mysql complete");
+    reply.code(200).header(result)
 
   });
 
