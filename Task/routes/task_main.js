@@ -86,16 +86,9 @@ module.exports = async function (fastify, opts) {
         let LogType = 'create';
         let Logcontent = `Supervisor ${Supervisor_email} create Task ${Task_name} at ${new Date().toISOString()}`;
 
-        try{
-          await recordLog(LogType, Logcontent);
 
-        }catch(e){
-          console.log(e);
-          return {
-            statusCode: 500,
-            body: 'Error occurred'
-          }
-        }
+        await recordLog(LogType, Logcontent);
+
         connection.query(query, values, (error, results) => {
           connection.release();
             if (error) {
@@ -131,19 +124,14 @@ module.exports = async function (fastify, opts) {
         let Logcontent = `Supervisor ${Supervisor_email} update Task ${Task_name} at ${new Date().toISOString()}`;
         
         //Done status
-        if(Task_status == 'Done')
+        if(Task_status == 'Done'){
           LogType = 'Done';
           Logcontent = `Supervisor ${Supervisor_email} Done Task ${Task_name} at ${new Date().toISOString()}`;
-        try{
-          await recordLog(LogType, Logcontent);
-
-        }catch(e){
-          console.log(e);
-          return {
-            statusCode: 500,
-            body: 'Error occurred'
-          }
         }
+
+        await recordLog(LogType, Logcontent);
+
+
         
         connection.query(query, values, (error, results) => {
           connection.release();
@@ -177,16 +165,7 @@ module.exports = async function (fastify, opts) {
         let LogType = 'Delete';
         let Logcontent = `Supervisor ${Supervisor_email} Delete Task ${Task_name} at ${new Date().toISOString()}`;
 
-        try{
-          await recordLog(LogType, Logcontent);
-
-        }catch(e){
-          console.log(e);
-          return {
-            statusCode: 500,
-            body: 'Error occurred'
-          }
-        }
+        await recordLog(LogType, Logcontent);
 
         connection.query(query, values, (error, results) => {
           connection.release();
