@@ -39,7 +39,7 @@ module.exports = async function (fastify, opts) {
     const mysql = fastify.mysql;
       const query = `SELECT * FROM Task`;
       const result = await mysql.query(query);
-      reply.code(200).header('Content-type','application/json').send(result[0])
+      reply.code(200).send(result[0])
 
   })
 
@@ -71,7 +71,7 @@ module.exports = async function (fastify, opts) {
     const result = await mysql.query(query);
     //console.log(result);
     console.log("mysql completed");
-    reply.code(200).header('Content-type','application/json').send(result[0])
+    reply.code(200).send(result[0])
 
   });
 
@@ -111,7 +111,7 @@ module.exports = async function (fastify, opts) {
     const result = await mysql.query(query);
     //console.log(result);
     console.log("mysql complete");
-    reply.code(200).header('Content-type','application/json').send(result[0])
+    reply.code(200).send(result[0])
 
   });
 
@@ -138,7 +138,7 @@ module.exports = async function (fastify, opts) {
     
     const result = await mysql.query(query);
     console.log(result);
-    reply.code(200).header('Content-type','application/json').send(result[0])
+    reply.code(200).send(result[0])
     
   });
 }
