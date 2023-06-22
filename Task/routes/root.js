@@ -39,7 +39,7 @@ module.exports = async function (fastify, opts) {
     const mysql = fastify.mysql;
       const query = `SELECT * FROM Task`;
       const result = await mysql.query(query);
-      reply.code(200).header(result)
+      reply.code(200).send(result)
 
   })
 
@@ -71,7 +71,7 @@ module.exports = async function (fastify, opts) {
     const result = await mysql.query(query);
     //console.log(result);
     console.log("mysql completed");
-    reply.code(200).header(result)
+    reply.code(200).send(result)
 
   });
 
@@ -111,14 +111,14 @@ module.exports = async function (fastify, opts) {
     const result = await mysql.query(query);
     //console.log(result);
     console.log("mysql complete");
-    reply.code(200).header(result)
+    reply.code(200).send(result)
 
   });
 
   //DELETE
   fastify.delete('/:Task_id', async (request, reply) => {
     let Task_id = request.params.Task_id;
-
+    const { Task_name, Task_contents, Task_status, Deadline, PIC_email, Supervisor_email } = request.body;
     //log
     let LogType = 'Delete';
     let Logcontent = `Supervisor ${Supervisor_email} Delete Task ${Task_name} at ${new Date().toISOString()}`;
@@ -138,7 +138,7 @@ module.exports = async function (fastify, opts) {
     
     const result = await mysql.query(query);
     console.log(result);
-    reply.code(200).header('Content-type','application/json').send(result[0])
+    reply.code(200).send(result)
     
   });
 }
