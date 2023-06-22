@@ -1,14 +1,14 @@
 {
-  "name": "Task",
+  "name": "fuck",
   "version": "1.0.0",
-  "description": "This project Task bootstrapped with Fastify-CLI.",
+  "description": "This project was bootstrapped with Fastify-CLI.",
   "main": "app.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
     "test": "tap \"test/**/*.test.js\"",
-    "start": "fastify start -l info app.js --address 0.0.0.0",
+    "start": "fastify start -l info app.js",
     "dev": "fastify start -w -l info -P app.js"
   },
   "keywords": [],
@@ -16,12 +16,12 @@
   "license": "ISC",
   "dependencies": {
     "@fastify/autoload": "^5.0.0",
+    "@fastify/mysql": "^4.1.0",
     "@fastify/sensible": "^5.0.0",
+    "aws-sdk": "^2.1167.0",
     "fastify": "^4.0.0",
     "fastify-cli": "^5.7.1",
-    "fastify-plugin": "^4.0.0",
-    "mysql": "^2.18.1",
-    "aws-sdk": "^2.1167.0"
+    "fastify-plugin": "^4.0.0"
   },
   "devDependencies": {
     "tap": "^16.1.0"
