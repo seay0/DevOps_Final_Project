@@ -10,7 +10,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-     working-directory: "./Auth"  
+     working-directory: "./Email" 
     steps:
     - name: Checkout
       uses: actions/checkout@v3  # 최신 소스 코드를 체크아웃합니다.
@@ -24,7 +24,7 @@ jobs:
       run: npm ci  # 필요한 의존성을 설치합니다.
 
     - name: Package Function
-      run: zip -r function.zip .  # 필요한 파일들을 압축합니다.
+      run: zip -r function.zip *  # 필요한 파일들을 압축합니다.
     
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
