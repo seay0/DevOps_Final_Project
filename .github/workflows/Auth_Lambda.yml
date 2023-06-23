@@ -22,11 +22,10 @@ jobs:
 
     - name: Install dependencies
       run: npm ci  # 필요한 의존성을 설치합니다.
-      working-directory: ${{ env.working-directory }}  # 작업 디렉토리를 'Auth'로 변경합니다.
 
     - name: Package Function
-      run: zip -r function.zip *  # './Auth' 디렉토리의 파일들만 압축합니다.
-      working-directory: ${{ env.working-directory }}  # 작업 디렉토리를 'Auth'로 변경합니다.
+      run: zip -r function.zip *  # 필요한 파일들을 압축합니다.
+      working-directory: ${{ env.working-directory }}
     
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
