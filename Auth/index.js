@@ -1,75 +1,42 @@
+var aws = require("aws-sdk");
+var ses = new aws.SES({ region: "ap-northeast-2" });
+var dynamodb = new aws.DynamoDB({ region: "ap-northeast-2" });
 
-const AWS = require('aws-sdk');
-const ddb = new AWS.DynamoDB.DocumentClient();
+exports.handler = async function (event) {
+  var params = {
+    TableName: "Dynamo_Log", // 테이블 이름을 여기에 입력하세요
+  };
 
-function recordTestResult(email, password) {
-  return ddb.put({
-    TableName: 'Dynamo_user',
-    Item: {
-      email: email,
-      password: password,
-      timestamp: new Date().toISOString(),
-    },
-  }).promise();
-}
+  var data = await dynamodb.scan(params).promise();
 
-function errorResponse(errorMessage, awsRequestId, callback) {
-  callback(null, {
-    statusCode: 500,
-    body: JSON.stringify({
-      Error: errorMessage,
-      Reference: awsRequestId,
-    }),
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-    },
+  // 모든 항목을 스캔한 후에 JavaScript 배열의 sort 함수를 사용하여 최신 항목을 찾습니다.
+  var sortedItems = data.Items.sort(function(a, b) {
+    return new Date(b.Timestamp.S) - new Date(a.Timestamp.S);
   });
-}
 
-exports.handler = async (event) => {
-  // Hardcoded email and password values for demonstration purposes
-  const users = [
-    { email: 'mase306@naver.com', password: 'zerobase0000!' },
-    { email: 'codestates@devops.com', password: 'dob4' },
-  ];
-
-  try {
-    const email = event.email;
-    const password = event.password;
-
-    // Find the user with the given email in the users array
-    const user = users.find((u) => u.email === email);
-
-    if (!user) {
-      // User not found
-      return {
-        statusCode: 404,
-        body: 'User not found',
-      };
-    }
-
-    if (user.password === password) {
-      // Passwords match, login successful
-      
-      // Record the result to DynamoDB
-      await recordTestResult(email, password);
-      
-      return {
-        statusCode: 200,
-        body: 'Login successful',
-      };
-    } else {
-      // Passwords do not match, login failed
-      return {
-        statusCode: 401,
-        body: 'Login failed',
-      };
-    }
-  } catch (error) {
-    console.log(error);
-    return {
-      statusCode: 500,
-      body: 'Error occurred',
-    };
+  var textBody = "";
+  if (sortedItems.length > 0) {
+    var item = sortedItems[0];
+    textBody += `Timestamp: ${item.Timestamp.S}\nLogType: ${item.LogType.S}\nLogContent: ${item.Logcontent.S}\n\n`;
   }
+
+  var subject = "DynamoDB Table Contents";
+
+  var emailParams = {
+    Destination: {
+      ToAddresses: [
+        "mase306.devops@gmail.com",
+        "wnalsrud113@gmail.com"
+      ],
+    },
+    Message: {
+      Body: {
+        Text: { Data: textBody },
+      },
+      Subject: { Data: subject },
+    },
+    Source: "mase306.devops@gmail.com",
+  };
+
+  return ses.sendEmail(emailParams).promise();
 };
