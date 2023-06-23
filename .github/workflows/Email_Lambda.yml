@@ -36,3 +36,4 @@ jobs:
 
     - name: Deploy to Lambda
       run: aws lambda update-function-code --function-name EmailServiceLambda --zip-file fileb://function.zip  # Lambda 함수 이름 잘 넣어야함
+      working-directory: ${{ env.working-directory }}

@@ -36,3 +36,4 @@ jobs:
 
     - name: Deploy to Lambda
       run: aws lambda update-function-code --function-name DynamoUserLambda --zip-file fileb://function.zip  # 'my-function' 부분을 실제 Lambda 함수 이름으로 바꿔주세요.
+      working-directory: ${{ env.working-directory }}
