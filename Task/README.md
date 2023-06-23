@@ -1,7 +1,3 @@
-# 작업관리부분 백엔드 파트입니다
-
----
-
 # Getting Started with [Fastify-CLI](https://www.npmjs.com/package/fastify-cli)
 This project was bootstrapped with Fastify-CLI.
 
