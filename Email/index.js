@@ -1,7 +1,7 @@
 var aws = require("aws-sdk");
 var ses = new aws.SES({ region: "ap-northeast-2" });
 var dynamodb = new aws.DynamoDB({ region: "ap-northeast-2" });
-//check Git Action
+//Test Git Action
 
 exports.handler = async function (event) {
   var params = {
