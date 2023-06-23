@@ -1,0 +1,37 @@
+name: Deploy to AWS Lambda
+
+on:
+  push:
+    branches: [ "dev" ]
+    paths: 
+      - './Email/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+     working-directory: "./Auth"  
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3  # 최신 소스 코드를 체크아웃합니다.
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14  # 사용할 Node.js 버전을 지정합니다.
+
+    - name: Install dependencies
+      run: npm ci  # 필요한 의존성을 설치합니다.
+
+    - name: Package Function
+      run: zip -r function.zip .  # 필요한 파일들을 압축합니다.
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}  # AWS_ACCESS_KEY_ID를 GitHub Secrets에서 가져옵니다.
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # AWS_SECRET_ACCESS_KEY를 GitHub Secrets에서 가져옵니다.
+        aws-region: ap-northeast-2  # AWS region을 지정합니다.
+
+    - name: Deploy to Lambda
+      run: aws lambda update-function-code --function-name EmailServiceLambda --zip-file fileb://function.zip  # Lambda 함수 이름 잘 넣어야함
