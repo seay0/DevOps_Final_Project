@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk');
 const ddb = new AWS.DynamoDB.DocumentClient();
-//Test Git Action
+//Test Git Action 
 
 // DynamoDB에서 사용자 정보를 찾는 함수
 async function findUser(email, password) {
